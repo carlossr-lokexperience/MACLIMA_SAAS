@@ -2,13 +2,10 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field
+from typing import List, Optional
 
 
 class Customer(SQLModel, table=True):
-    """
-    Modelo de base de datos para el Módulo CRM.
-    Representa a un cliente o lead dentro de un portal específico.
-    """
 
     __tablename__ = "crm_customers"
 
@@ -31,5 +28,22 @@ class Customer(SQLModel, table=True):
     # Fechas automáticas
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Budget(SQLModel, table=True):
+    __tablename__ = "crm_budgets"
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    description: str
+    total_amount: float
+
+    status: str = Field(default="draft")
+
+    # RELACIÓN: Vinculación con el Cliente con el presupuesto
+
+    customer_id: UUID = Field(foreign_key="crm_customers.id")
+
+    tenant_id: str = Field(index=True)
+
+    created_at: datetime = Field(default_factory=datetime.utcnow)
