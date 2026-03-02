@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { getUser } from "@/lib/storage";
 import { useRouter } from "next/navigation";
 
-export function RequireAuth({ children, portal }: { children: React.ReactNode; portal?: "internal" | "partner" | "client" }) {
+/*export function RequireAuth({ children, portal }: { children: React.ReactNode; portal?: "internal" | "partner" | "client" }) {
   const router = useRouter();
   const [ok, setOk] = useState(false);
 
@@ -25,5 +25,9 @@ export function RequireAuth({ children, portal }: { children: React.ReactNode; p
   }, [portal, router]);
 
   if (!ok) return null;
+  return <>{children}</>;
+}*/
+
+export function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

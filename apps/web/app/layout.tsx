@@ -1,5 +1,6 @@
 import "./globals.css";
 import React from "react";
+import "flatpickr/dist/flatpickr.min.css";
 
 export const metadata = {
   title: "MACLIMA OS",

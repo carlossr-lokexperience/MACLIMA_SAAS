@@ -2,7 +2,7 @@ import React from "react";
 
 export function KpiRow({ items }: { items: { label: string; value: string; delta?: string }[] }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
       {items.map((it, idx) => (
         <div key={idx} className="card">
           <div className="cardPad">
