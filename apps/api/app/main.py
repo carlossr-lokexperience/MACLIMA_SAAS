@@ -27,6 +27,10 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     def _startup():
+        from sqlmodel import SQLModel
+        from .db import engine
+
+        print("🛠️ DEBUG: Sincronizando tablas...")
         init_db()
 
     app.include_router(auth_router)

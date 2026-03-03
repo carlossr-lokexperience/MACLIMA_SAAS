@@ -1,49 +1,59 @@
 from datetime import datetime
-from typing import Optional
-from uuid import UUID, uuid4
-from sqlmodel import SQLModel, Field
+from enum import Enum
 from typing import List, Optional
+from uuid import UUID, uuid4
+from sqlmodel import Field, Relationship, SQLModel
+
+
+# 1. Definición de Estados para el Pipeline
+class BudgetStatus(str, Enum):
+    DRAFT = "draft"
+    SENT = "sent"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
 
 
 class Customer(SQLModel, table=True):
-
     __tablename__ = "crm_customers"
 
-    # Identificador único (Primary Key)
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: str
+    name: str
+    email: str
+    is_lead: bool = True
 
-    # Campo para Multi-tenant: Identifica a qué portal/empresa pertenece este cliente
-    tenant_id: str = Field(index=True)
-
-    # Información de contacto
-    name: str = Field(index=True)
-    email: str = Field(unique=True, index=True)
-    nif: Optional[str] = Field(default=None, description="Identificación fiscal")
-    phone: Optional[str] = Field(default=None)
-    address: Optional[str] = Field(default=None)
-
-    # Estado en el CRM: 'lead' (prospecto), 'active' (cliente), 'inactive'
-    status: str = Field(default="lead")
-
-    # Fechas automáticas
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    # Relación: Un cliente puede tener muchos presupuestos / Customer → muchos Budget
+    budgets: List["Budget"] = Relationship(back_populates="customer")
 
 
 class Budget(SQLModel, table=True):
     __tablename__ = "crm_budgets"
 
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    description: str
-    total_amount: float
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: str
+    total_amount: float  # total presupuesto
 
-    status: str = Field(default="draft")
+    status: BudgetStatus = Field(default=BudgetStatus.DRAFT)
 
-    # RELACIÓN: Vinculación con el Cliente con el presupuesto
+    # Relación con Cliente
+    customer_id: UUID = Field(foreign_key="crm_customers.id")  # foreign Key
+    customer: Optional[Customer] = Relationship(back_populates="budgets")
 
-    customer_id: UUID = Field(foreign_key="crm_customers.id")
+    # Relación con Archivos
+    attachments: List["Attachment"] = Relationship(back_populates="budget")
 
-    tenant_id: str = Field(index=True)
+
+class Attachment(SQLModel, table=True):
+    __tablename__ = "crm_attachments"
+
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    tenant_id: str
+    file_name: str
+    file_path: str
+    file_type: str
+
+    # Relación con Presupuesto
+    budget_id: UUID = Field(foreign_key="crm_budgets.id")
+    budget: Optional[Budget] = Relationship(back_populates="attachments")
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
