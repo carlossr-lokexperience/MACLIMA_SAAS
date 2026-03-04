@@ -46,7 +46,15 @@ class User(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
     email = Column(String(255), nullable=False, unique=True, index=True)
     full_name = Column(String(255), nullable=False)
-    password_hash = Column(String(255), nullable=False)
+
+    # --- CAMBIO: nullable=True para permitir usuarios que solo usan SSO (Google)
+    # Si el usuario se registró por Google, este campo será None.
+    password_hash = Column(String(255), nullable=True)
+
+    # --- NUEVO: almacena el identificador único de Google (sub) para el SSO
+    # Permite buscar al usuario por su cuenta Google sin depender del email.
+    google_sub = Column(String(255), nullable=True, unique=True, index=True)
+
     portal = Column(Enum(Portal), nullable=False, default=Portal.internal)
     role = Column(Enum(Role), nullable=False, default=Role.ops)
     is_active = Column(Boolean, nullable=False, default=True)
