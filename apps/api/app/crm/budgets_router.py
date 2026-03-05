@@ -10,9 +10,9 @@ router = APIRouter(prefix="/crm/budgets", tags=["Budgets"])
 
 @router.post("/")
 def create_budget(budget: Budget, session: Session = Depends(get_db)):
-    """
-    Crear un nuevo presupuesto vinculado a un cliente (customer_id).
-    """
+
+    # Crear un nuevo presupuesto vinculado a un cliente (customer_id).
+
     session.add(budget)
     session.commit()
     session.refresh(budget)
@@ -40,6 +40,39 @@ def get_pipeline(session: Session = Depends(get_db)):
         pipeline[b.status.value].append(b)
 
     return pipeline
+
+
+@router.get("/stats")
+def get_budget_stats(session: Session = Depends(get_db)):
+
+    statement = select(Budget)
+    budgets = session.execute(statement).scalars().all()
+
+    # Inicializamos los contadores en 0.0
+    stats = {
+        "draft": {"count": 0, "total_base": 0.0, "total_iva": 0.0},
+        "sent": {"count": 0, "total_base": 0.0, "total_iva": 0.0},
+        "accepted": {"count": 0, "total_base": 0.0, "total_iva": 0.0},
+        "rejected": {"count": 0, "total_base": 0.0, "total_iva": 0.0},
+    }
+
+    iva_rate = 0.21  # 21% de IVA en España para climatización
+
+    for b in budgets:
+        state = b.status.value
+        base = b.total_amount
+        iva = base * iva_rate
+
+        stats[state]["count"] += 1
+        stats[state]["total_base"] += base
+        stats[state]["total_iva"] += iva
+
+    return {
+        "summary": stats,
+        "grand_total_iva_included": sum(
+            s["total_base"] + s["total_iva"] for s in stats.values()
+        ),
+    }
 
 
 @router.post("/{budget_id}/attachments")

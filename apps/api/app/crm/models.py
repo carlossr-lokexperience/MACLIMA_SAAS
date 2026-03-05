@@ -42,6 +42,8 @@ class Budget(SQLModel, table=True):
     # Relación con Archivos
     attachments: List["Attachment"] = Relationship(back_populates="budget")
 
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 
 class Attachment(SQLModel, table=True):
     __tablename__ = "crm_attachments"

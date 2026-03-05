@@ -30,6 +30,8 @@ def create_app() -> FastAPI:
         from sqlmodel import SQLModel
         from .db import engine
 
+        # SQLModel.metadata.drop_all(bind=engine)
+
         print("🛠️ DEBUG: Sincronizando tablas...")
         init_db()
 
